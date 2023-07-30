@@ -1,2 +1,2 @@
-from brands import *
-from mobiles import *
+from .brands import *
+from .mobiles import *
