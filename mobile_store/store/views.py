@@ -35,19 +35,19 @@ class MobileStoreView(APIView):
         return JsonResponse(serializer.data, safe=False)
 
 
-
 class GetMobileWithBrandView(APIView):
     renderer_classes = [TemplateHTMLRenderer]
-    template_name = 'create_mobile_store.html'
+    template_name = 'get_mobile_with_brand.html'
 
     def get(self, request):
-        form = MobileForm()
-        return Response({'form': form})
+        return Response()
 
     def post(self, request):
-        form = MobileForm(request.POST)
-        if not form.is_valid():
-            return Response({'form': form})
-        mobile = form.save()
-        serializer = MobileSerializers(mobile)
-        return JsonResponse(serializer.data, safe=False)
+        brand_name = request.POST.get('brand')
+
+        mobiles = Mobile.objects.filter(brand__name=brand_name)
+        if mobiles:
+            serializer = MobileSerializers(mobiles, many=True)
+            return JsonResponse(serializer.data, safe=False)
+        return JsonResponse(f"mobile with this brand ({brand_name}) not found", safe=False)
+
