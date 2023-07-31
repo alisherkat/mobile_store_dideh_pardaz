@@ -1,3 +1,4 @@
+from django.db.models import F
 from django.http import HttpResponse, JsonResponse
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.response import Response
@@ -11,7 +12,17 @@ from store.serializers import MobileSerializers
 def mobile_from_brands(request, nationality):
     mobiles = Mobile.objects.filter(brand__nationality=nationality)
     if not mobiles:
-        return HttpResponse(status=404)
+        return JsonResponse(f"mobile with this brand nationality ({nationality}) not found", safe=False)
+
+    if request.method == "GET":
+        serializer = MobileSerializers(mobiles, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+
+def mobile_same_brands(request):
+    mobiles = Mobile.objects.filter(country=F("brand__nationality"))
+    if not mobiles:
+        return JsonResponse("Not Found", safe=False)
 
     if request.method == "GET":
         serializer = MobileSerializers(mobiles, many=True)
