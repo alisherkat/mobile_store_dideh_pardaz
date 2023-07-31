@@ -4,7 +4,7 @@ from django.db import models
 
 class Mobile(models.Model):
     brand = models.ForeignKey("Brand", on_delete=models.CASCADE, related_name="sub_mobile")
-    model_name = models.CharField(max_length=128, unique=True)
+    model_name = models.CharField(max_length=128, unique=True, primary_key=True)
     price = models.FloatField(validators=[MinValueValidator(0.0)])
     size = models.FloatField(validators=[MinValueValidator(0.0)])
     color = models.CharField(max_length=32)
