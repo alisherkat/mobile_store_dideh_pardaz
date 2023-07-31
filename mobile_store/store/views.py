@@ -1,5 +1,5 @@
 from django.db.models import F
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,7 +10,7 @@ from store.serializers import MobileSerializers
 
 
 def mobile_from_brands(request, nationality):
-    mobiles = Mobile.objects.filter(brand__nationality=nationality)
+    mobiles = Mobile.objects.filter(brand__nationality__iexact=nationality)
     if not mobiles:
         return JsonResponse(f"mobile with this brand nationality ({nationality}) not found", safe=False)
 
@@ -20,13 +20,15 @@ def mobile_from_brands(request, nationality):
 
 
 def mobile_same_brands(request):
-    mobiles = Mobile.objects.filter(country=F("brand__nationality"))
+    mobiles = Mobile.objects.filter(country__iexact=F("brand__nationality"))
     if not mobiles:
         return JsonResponse("Not Found", safe=False)
 
     if request.method == "GET":
         serializer = MobileSerializers(mobiles, many=True)
-        return JsonResponse(serializer.data, safe=False)
+
+        j = JsonResponse(serializer.data, safe=False)
+        return j
 
 
 class MobileStoreView(APIView):
@@ -56,9 +58,8 @@ class GetMobileWithBrandView(APIView):
     def post(self, request):
         brand_name = request.POST.get('brand')
 
-        mobiles = Mobile.objects.filter(brand__name=brand_name)
+        mobiles = Mobile.objects.filter(brand__name__iexact=brand_name)
         if mobiles:
             serializer = MobileSerializers(mobiles, many=True)
             return JsonResponse(serializer.data, safe=False)
         return JsonResponse(f"mobile with this brand ({brand_name}) not found", safe=False)
-
